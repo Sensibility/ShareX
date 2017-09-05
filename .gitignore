@@ -1,3 +1,4 @@
 *.pyc
 .idea
 public/images/*
+private/config/conf.json
