@@ -11,6 +11,8 @@ class Module():
     index = ""
     root = ""
 
+    templates = ""
+
     def CheckPassword(self, password):
         return self.password == password
 
@@ -30,8 +32,8 @@ class ModuleLoader(Module):
         if(mods.get('Images')):
             self.modules.append(ImageModule(mods.get('Images')))
 
-        if(mods.get('Root')):
-            self.root = mods.get('Root')
+        if(config.get('Root')):
+            self.root = config.get('Root')
 
         f.close()
 
@@ -48,6 +50,7 @@ class ImageModule(Module):
         self.password = module.get("Password")
         self.root = module.get("Root")
         self.index = module.get("Index")
+        self.templates = module.get("Template")
 
  #   def __init__(self, input):
 a = ModuleLoader()
@@ -71,11 +74,13 @@ def upload():
 
 @app.route('/public/images/<name>')
 def view(name):
-    return send_from_directory('./public/images', name)
+    return send_from_directory(a.root + a.GetImage().root, name)
 
 @app.route('/image/<name>')
 def show(name):
-    return '<img src="/public/images/' + name + '"></img>'
+    print(a.root + a.GetImage().index)
+    app.template_folder = a.root + a.GetImage().templates
+    return render_template(a.GetImage().index, image=("/" + a.GetImage().root + name))
 
 
 def hash(file):

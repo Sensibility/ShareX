@@ -2,7 +2,8 @@
     "Modules": {
         "Images": {
             "Root": "public/images/",
-            "Index": "public/templates/image.html",
+            "Index": "image.html",
+            "Template": "public/templates/",
             "Password": "<pw>"
         }
     },
