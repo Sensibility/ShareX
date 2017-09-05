@@ -3,16 +3,37 @@ from werkzeug.utils import secure_filename
 import hashlib, time
 
 app = Flask(__name__)
+#app.run(threaded=True)
 
 import os, json
-class ModuleLoader():
+class Module():
+    password = ""
+    index = ""
+    root = ""
+
+    def CheckPassword(self, password):
+        return self.password == password
+
+class ModuleLoader(Module):
     modules = []
 
     def __init__(self):
-        with open(os.getcwd() + "/private/config/conf.json", 'r') as f:
-            mods = json.loads(str.join("", f.readlines())).get('Modules')
-            if(mods.get('Images')):
-                self.modules.append(ImageModule(mods.get('Images')))
+        dir = os.getcwd() + "/private/config/"
+        try:
+            f = open(dir + "conf.json", 'r')
+        #For the build agent
+        except:
+            f = open(dir + "conf.orig.json", 'r')
+
+        config = json.loads(str.join("", f.readlines()))
+        mods = config.get('Modules')
+        if(mods.get('Images')):
+            self.modules.append(ImageModule(mods.get('Images')))
+
+        if(mods.get('Root')):
+            self.root = mods.get('Root')
+
+        f.close()
 
     def __Get(self, Module):
         for mod in self.modules:
@@ -21,14 +42,6 @@ class ModuleLoader():
 
     def GetImage(self):
         return self.__Get(ImageModule)
-
-class Module():
-    password = ""
-    index = ""
-    root = ""
-
-    def CheckPassword(self, password):
-        return self.password == password
 
 class ImageModule(Module):
     def __init__(self, module):
@@ -49,10 +62,8 @@ def upload():
     if(a.GetImage().CheckPassword(password)):
         file = request.files['upload']
         hashResult = hash(file)
-        print(file.name)
-        print(os.path.splitext(file.name)[1])
         #try
-        file.save(a.GetImage().root + secure_filename(hashResult) + os.path.splitext(file.name)[1])
+        file.save(a.root + a.GetImage().root + secure_filename(hashResult) + os.path.splitext(file.name)[1])
 
         return redirect(url_for('.show', name=hashResult))
     else:
@@ -64,7 +75,6 @@ def view(name):
 
 @app.route('/image/<name>')
 def show(name):
-    return
     return '<img src="/public/images/' + name + '"></img>'
 
 
