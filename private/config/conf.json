@@ -1,7 +1,7 @@
 {
     "Modules": {
         "Images": {
-            "Root": "/public/images",
+            "Root": "/public/images/",
             "Index": "/public/templates/image.html",
             "Password": "not124"
         }
