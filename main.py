@@ -9,7 +9,7 @@ class ModuleLoader():
     modules = []
 
     def __init__(self):
-        with open(os.getcwd() + "\\private\\config\\conf.json", 'r') as f:
+        with open(os.getcwd() + "/private/config/conf.json", 'r') as f:
             mods = json.loads(str.join("", f.readlines())).get('Modules')
             if(mods.get('Images')):
                 self.modules.append(ImageModule(mods.get('Images')))
