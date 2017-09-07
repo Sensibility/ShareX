@@ -1,0 +1,11 @@
+{
+    "Modules": {
+        "Images": {
+            "Root": "public/images/",
+            "Index": "image.html",
+            "Template": "public/templates/",
+            "Password": "<pw>"
+        }
+    },
+    "Root": "./"
+}
