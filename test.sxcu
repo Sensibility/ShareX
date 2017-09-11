@@ -1,0 +1,15 @@
+﻿{
+  "Name": "Testing",
+  "DestinationType": "ImageUploader",
+  "RequestType": "POST",
+  "RequestURL": "localhost:5000/upload/image",
+  "FileFormName": "upload",
+  "Arguments": {
+    "password": "<pw>"
+  },
+  "ResponseType": "Text",
+  "RegexList": [
+    ".*"
+  ],
+  "URL": "localhost:5000$1$"
+}

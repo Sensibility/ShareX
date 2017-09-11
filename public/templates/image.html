@@ -1,10 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>SuperPhage</title>
-</head>
-<body>
-    <img src="{{ image }}" />
-</body>
-</html>
+{% extends "template.html" %}
+{% block head %}
+{{ super() }}
+
+<style>
+    img {
+        grid-area: body
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<img src="{{ image }}" />
+{% endblock %}

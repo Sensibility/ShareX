@@ -7,21 +7,45 @@ class ImageModule(Module):
         self.root = module.get("Root")
         self.index = module.get("Index")
         self.templates = module.get("Template")
+        self.list = module.get("List")
+
+        self.extension = module.get("Extension")
+        self.MaxSize = module.get("MaxSize")
 
         self.cwd = cwd
 
+    def IsAllowedFile(self, filename):
+        return '.' in filename and \
+            filename.rsplit('.', 1)[1].lower() in self.extension
+
     def UploadImage(self, image, secure_filename):
-        hashResult = self._hash(image)
-        image.save(self.cwd + self.root + secure_filename(hashResult) + os.path.splitext(image.filename)[1])
+        if(self.IsAllowedFile(image.filename)):
+            hashResult = self._hash(image)
+            fileName = secure_filename(hashResult) + os.path.splitext(image.filename)[1]
+            image.save(self.cwd + self.root + fileName)
+            return fileName
+        else:
+            return False
 
     def GetTemplateFolder(self):
         return self.cwd + self.templates
+
+    def GetImageFolder(self):
+        return self.cwd + self.root
 
     def Resources(self, name, send_from_directory):
         return send_from_directory(self.cwd + self.root, name)
 
     def Index(self, name, render_template):
         return render_template(self.index, image="/"+ self.root + name)
+
+    def List(self, render_template):
+        list = []
+        for f in [f for f in os.listdir(self.GetImageFolder())]:
+            if(os.path.isfile(os.path.join(self.GetImageFolder(), f)) and self.IsAllowedFile(f)):
+                list.append(f)
+
+        return render_template(self.list, images=list)
 
     def _hash(self, file):
         m = None

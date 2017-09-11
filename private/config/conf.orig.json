@@ -4,7 +4,10 @@
             "Root": "public/images/",
             "Index": "image.html",
             "Template": "public/templates/",
-            "Password": "<pw>"
+            "List": "images.html",
+            "Password": "<pw>",
+            "Extension": ["jpg", "jpeg", "png"],
+            "MaxSize": 16777216
         }
     },
     "Root": "./"

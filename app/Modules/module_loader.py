@@ -4,12 +4,13 @@ import os, json
 
 class ModuleLoader(Module):
     modules = []
+    root = ""
 
     def __init__(self):
         dir = os.getcwd() + "/private/config/"
         try:
             f = open(dir + "conf.json", 'r')
-        #For the build agent
+        #For the build agent/testing
         except:
             f = open(dir + "conf.orig.json", 'r')
 
@@ -22,8 +23,10 @@ class ModuleLoader(Module):
         if(mods.get('Images')):
             self.modules.append(ImageModule(mods.get('Images'), self.root))
 
-
         f.close()
+
+    def VersionCheck(self, version):
+        return self.version == version
 
     def __Get(self, Module):
         for mod in self.modules:

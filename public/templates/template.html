@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="favicon" type="image/x-icon" />
+    <style>
+        .body {
+            display: grid;
+            grid-template:
+                [header-start] "header header header" 25px [header-end]
+                [body-start] "body body body" auto [body-end]
+                [footer-start] "footer footer footer" 10px [footer-end]
+                / 1fr auto 1fr;
+
+            justify-items: center;
+        }
+    </style>
+
+    <title>{% block title %}SuperPhage{% endblock %}</title>
+    {% endblock %}
+</head>
+<body>
+{% block headscript %}
+{% endblock %}
+<div class="body">
+    {% block body %}
+    {% endblock %}
+</div>
+
+</body>
+</html>
