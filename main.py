@@ -38,7 +38,7 @@ def view(name):
 def image():
     flaskApp.template_folder = Modules.GetImage().GetTemplateFolder()
     return Modules.GetImage().List(render_template)
-cd
+
 @flaskApp.route('/image/favicon')
 def favicon():
     return send_from_directory(Modules.root, "favicon.ico")
