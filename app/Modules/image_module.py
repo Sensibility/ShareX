@@ -1,6 +1,7 @@
 from .base_module import Module
 import os, hashlib, time, imghdr, io
 from os.path import isfile, join, splitext
+from ..Utilities import make_dir_recursive
 
 
 class ImageModule(Module):
@@ -15,6 +16,8 @@ class ImageModule(Module):
 
         self.extension = pModule.get("Extension")
         self.MaxSize = pModule.get("MaxSize")
+
+        make_dir_recursive(self.root)
 
         self.cwd = cwd
 
