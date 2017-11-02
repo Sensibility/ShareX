@@ -19,8 +19,7 @@ class ModuleFactory(Module):
         config = json.loads(str.join("", f.readlines()))
         mods = config.get('Modules')
 
-        if config.get('Root'):
-            self.root = config.get('Root')
+        self.root = os.getcwd()
 
         for key in mods.keys():
             mod = mods.get(key)

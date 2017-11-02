@@ -33,7 +33,7 @@ class ImageModule(Module):
         if self.IsAllowedFile(image.name, contents):
             hashResult = self._hash(image)
             fileName = secure_filename(hashResult) + splitext(image.filename)[1]
-            with open(self.cwd + self.root + fileName, 'wb') as f:
+            with open(os.path.join(self.cwd, self.root, fileName), 'wb') as f:
                 f.writelines(contents)
             result = fileName
 

@@ -20,6 +20,4 @@ chmod +x *.sh
 All .sh files in the root directory contain different tasks.<br />
 * `install.sh` - This will install all required dependencies to run this app (excluding python)
 * `compile.sh` - Self explanatory, used by build agent
-* `run.sh [debug]` - Will run the app
-    * Debug flag sets the server to debug mode, leave it out for production
 * `test.sh` - Runs all of the tests for the project
