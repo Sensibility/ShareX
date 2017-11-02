@@ -1,1 +1,1 @@
-from tests.main_test import ImageModuleTests
+from tests.main_test import *
