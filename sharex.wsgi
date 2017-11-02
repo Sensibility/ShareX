@@ -1,6 +1,5 @@
 import sys
-from os.path import dirname, abspath
 
-sys.path.insert(0, abspath(dirname(sys.argv[0])))
+sys.path.insert(0, '/var/www/ShareX')
 
 from main import flaskApp

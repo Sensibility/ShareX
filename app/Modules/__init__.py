@@ -33,7 +33,7 @@ class ModuleFactory(Module):
     def VersionCheck(self, version):
         return self.version == version
 
-    def GetModule(self, pModule: Module):
+    def GetModule(self, pModule):
         for key in self.modules:
             mod = self.modules[key]
             if issubclass(pModule, type(mod)):

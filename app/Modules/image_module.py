@@ -21,7 +21,7 @@ class ImageModule(Module):
 
         self.cwd = cwd
 
-    def IsAllowedFile(self, filename, contents: io.BytesIO):
+    def IsAllowedFile(self, filename, contents):
         result = '.' in filename and \
                  (filename.rsplit('.', 1)[1].lower() in self.extension) \
                  or \
