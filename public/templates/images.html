@@ -1,6 +1,11 @@
-<% extends 'template.html' %>
-<% block body %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SuperPhage</title>
+</head>
 {% for image in images %}
-    <a href="/image/{{ image }}">{{ image }}</a><br />
+    <a href="{{ image }}">{{ image }}</a><br />
 {% endfor %}
-<% endblock %>
+</body>
+</html>

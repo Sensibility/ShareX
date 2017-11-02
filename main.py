@@ -1,28 +1,39 @@
-from flask import Flask, request, url_for, abort, send_from_directory, render_template
+from flask import Flask, request, url_for, abort, send_from_directory, render_template, jsonify
 from werkzeug.utils import secure_filename
-from app.Modules.module_loader import ModuleLoader
+from app.Converters.regex import RegexConverter
+from app.Modules import ModuleFactory
+from app.Modules.image_module import ImageModule
 
 flaskApp = Flask(__name__)
 
-Modules = ModuleLoader()
+Modules = ModuleFactory()
+Modules.Register(ImageModule)
+Modules.Bootstrap()
+flaskApp.url_map.converters['regex'] = RegexConverter
 
-@flaskApp.route("/")
-def main():
-    return "Yo"
+
+def custom_response(msg, status_code, err=""):
+    response = jsonify({'msg': msg, 'err': err})
+    response.status_code = status_code
+    return response
+
 
 @flaskApp.route("/upload/image", methods=['POST'])
 def upload():
     password = request.values.get('password')
-    imageModule = Modules.GetImage()
+    imageModule = Modules.GetModule(ImageModule)
 
-    if(imageModule.CheckPassword(password)):
+    if imageModule is None:
+        abort(500)
+
+    if imageModule.CheckPassword(password):
         file = request.files.get('upload')
-        if(file == None):
+        if file is None:
             abort(400)
         try:
             result = imageModule.UploadImage(file, secure_filename)
             if not result:
-                abort(400, "Invalid File Type")
+                return custom_response("Invalid File Type", 400)
             return url_for('.show', name=result)
         except Exception as e:
             flaskApp.log_exception(e)
@@ -30,27 +41,42 @@ def upload():
     else:
         abort(403)
 
-@flaskApp.route('/public/images/<name>')
+
+@flaskApp.route('/public/images/<regex("[A-Za-z0-9]+\.[a-z]+"):name>')
 def view(name):
-    return Modules.GetImage().Resources(name, send_from_directory)
+    image = Modules.GetModule(ImageModule)
 
-@flaskApp.route('/image')
-def image():
-    flaskApp.template_folder = Modules.GetImage().GetTemplateFolder()
-    return Modules.GetImage().List(render_template)
+    return image.Resources(name, send_from_directory)
 
-@flaskApp.route('/image/favicon')
+
+# @flaskApp.route('/image')
+# def image():
+#    flaskApp.template_folder = Modules.GetModule(ImageModule).GetTemplateFolder()
+#    return Modules.GetModule(ImageModule).List(render_template)
+
+
+@flaskApp.route('/favicon')
 def favicon():
-    return send_from_directory(Modules.root, "favicon.ico")
+    return send_from_directory(Modules.root, "public/favicon.ico")
+
+
+@flaskApp.route('/public/assets/<regex("[A-Za-z0-9]+\.css"):file>')
+def css(file):
+    return send_from_directory(Modules.root, "public/assets/" + file)
+
 
 @flaskApp.route('/public/sp_logo')
 def logo():
     return send_from_directory(Modules.root, "public/sp_logo.svg")
 
-@flaskApp.route('/image/<name>')
+
+@flaskApp.route('/image/<regex("[A-Za-z0-9]+\.[a-z]+"):name>')
 def show(name):
-    flaskApp.template_folder = Modules.GetImage().GetTemplateFolder()
+    image = Modules.GetModule(ImageModule)
+    flaskApp.template_folder = image.GetTemplateFolder()
 
-    return Modules.GetImage().Index(name, render_template)
+    return image.Index(name, render_template)
 
 
+if __name__ == "__main__":
+    flaskApp.run()

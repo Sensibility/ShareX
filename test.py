@@ -1,0 +1,1 @@
+from tests.main_test import ImageModuleTests

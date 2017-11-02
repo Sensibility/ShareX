@@ -6,6 +6,8 @@ class Module():
     templates = ""
     cwd = ""
 
+    name = ""
+
     def CheckPassword(self, password):
         return self.password == password
 
