@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SuperPhage</title>
+</head>
+<body>
+{# all_links.html #}
+<ul>
+    {% for url, endpoint in links %}
+        <li><a href="{{ url }}">{{ endpoint }}</a></li>
+    {% endfor %}
+</ul>
+</body>
+</html>

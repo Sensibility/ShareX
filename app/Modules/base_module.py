@@ -1,18 +1,12 @@
-class Module():
-    password = ""
-    index = ""
-    root = ""
+from flask import render_template
 
-    templates = ""
-    cwd = ""
 
-    name = ""
+class Module:
+    fs_root = "app"
+    password = None
 
-    def CheckPassword(self, password):
+    def authenticate(self, password):
         return self.password == password
 
-    def GetTemplateFolder(self):
-        return self.cwd
-
-    def Index(self, name, render_template):
+    def index(self, name):
         return render_template(self.index)

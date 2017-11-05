@@ -1,0 +1,13 @@
+{%  extends 'template.html' %}
+{% block head %}
+    <link rel="stylesheet" href="/assets/image.css">
+{% endblock %}
+
+{% block body %}
+{{ super() }}
+<div id="img" class="w3-padding-large w3-white w3-hover-pale-green w3-card-4">
+    <div class="w3-container">
+        <img src="{{ image }}" alt="{{ image }}" />
+    </div>
+</div>
+{% endblock %}
