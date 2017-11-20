@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
-python3 -m unittest test.py
+cd ../
+python3 -m unittest bin/test.py

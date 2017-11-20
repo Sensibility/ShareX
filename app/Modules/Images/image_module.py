@@ -2,11 +2,12 @@ import hashlib
 import imghdr
 import io
 import time
-from os.path import isfile, join, splitext
+from os.path import isfile, join, splitext, basename
 
 from flask import render_template, send_from_directory
 
 from app.Modules.base_module import Module
+from app.Utils.Utilities import make_dir_recursive
 
 
 class ImageModule(Module):
@@ -15,17 +16,24 @@ class ImageModule(Module):
     extensions = ['png', 'jpg', 'jpeg']
     password = '<pw>'
 
+    def __init__(self, cwd):
+        super().__init__(cwd)
+        self.fs_root = join(cwd, self.fs_root)
+        self.images = join(cwd, self.images)
+        make_dir_recursive(self.images)
+
     def allowed_file(self, filename, contents):
         result = '.' in filename and \
                  (filename.rsplit('.', 1)[1].lower() in self.extensions) \
-                 or \
+                 and \
                  (imghdr.what(contents) in self.extensions)
         return result
 
     def upload(self, image, secure_filename):
         contents = io.BytesIO(image.read())
 
-        if self.allowed_file(image.name, contents):
+        name = basename(image.filename)
+        if self.allowed_file(name, contents):
             hashResult = self._hash(image)
             fileName = secure_filename(hashResult) + splitext(image.filename)[1]
             with open(join(self.images, fileName), 'wb') as f:

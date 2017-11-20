@@ -1,14 +1,28 @@
 import unittest, json, os, chardet
+from os.path import realpath, dirname, join, isfile
 
 from main import flaskApp
 
-
-def ImagesDir(extra):
-    return os.path.join(os.getcwd(), 'public', 'images', extra)
+cwd = join(dirname(realpath(__file__)))
 
 
-def TestDir(extra):
-    return os.path.join(os.getcwd(), 'tests', extra)
+def images_dir(extra):
+    return join(cwd, '..', 'app', 'resources', 'images', extra)
+
+def static_url(extra):
+    return 'static/' + extra
+
+def test_dir(extra=""):
+    return join(cwd, extra)
+
+def resources_dir(extra):
+    return join(test_dir(), 'resources', extra)
+
+def asset_url(extra):
+    return 'assets/' + extra
+
+def asset_dir(extra):
+    return join('app', 'assets', extra)
 
 
 class BaseTest(unittest.TestCase):
@@ -20,46 +34,46 @@ class BaseTest(unittest.TestCase):
         self.flaskApp = flaskApp.test_client()
 
 
+
 class MainSiteTests(BaseTest, unittest.TestCase):
     def setUp(self):
         super().setUp()
 
+    def get_and_assert(self, url, status):
+        r = self.flaskApp.get(url)
+        self.assertEqual(status, r.status_code)
+        r.close()
+
+    def post_and_assert(self, url, status):
+        r = self.flaskApp.post(url)
+        self.assertEqual(status, r.status_code)
+        r.close()
+
     def test_favicon(self):
-        r = self.flaskApp.get("/favicon")
-        self.assertEqual(200, r.status_code)
+        self.get_and_assert(static_url('favicon.ico'), 200)
 
     def test_favicon_post(self):
-        r = self.flaskApp.post("/favicon")
-        self.assertEqual(405, r.status_code)
+        self.post_and_assert(static_url('favicon.ico'), 405)
 
     def test_sp_logo(self):
-        r = self.flaskApp.get("/public/sp_logo")
-        self.assertEqual(200, r.status_code)
+        self.get_and_assert(static_url('sp_logo.svg'), 200)
 
     def test_sp_logo_post(self):
-        r = self.flaskApp.post("/public/sp_logo")
-        self.assertEqual(405, r.status_code)
+        self.post_and_assert(static_url('sp_logo.svg'), 405)
 
     def test_css(self):
-        r = self.flaskApp.get("/public/assets/w3.css")
-        self.assertEqual(200, r.status_code)
-        with open("public/assets/w3.css", "r") as f:
-            file = "".join(f.readlines())
-            data = r.data.decode("utf-8").rstrip().replace('\r', '')
-            self.assertEqual(file, data)
+        self.get_and_assert(asset_url("w3.css"), 200)
 
     def test_css_post(self):
-        r = self.flaskApp.post("/public/assets/w3.css")
-        self.assertEqual(405, r.status_code)
+        self.post_and_assert(asset_url('w3.css'), 405)
 
     def test_css_bad(self):
-        r = self.flaskApp.get("/public/assets/../favicon.ico.css")
-        self.assertEqual(404, r.status_code)
+        self.get_and_assert(asset_url('../favico.ico.css'), 404)
 
 class ImageModuleTests(BaseTest, unittest.TestCase):
     def setUp(self):
         super().setUp()
-        self.postUrl = '/upload/image'
+        self.postUrl = '/upload'
 
     def test_upload_get(self):
         r = self.flaskApp.get(self.postUrl)
@@ -78,42 +92,33 @@ class ImageModuleTests(BaseTest, unittest.TestCase):
         self.assertEqual(400, r.status_code)
 
     def test_upload_post(self):
-        with open(TestDir('resources/image.png'), 'rb') as file:
+        with open(resources_dir('image.png'), 'rb') as file:
             r = self.flaskApp.post(self.postUrl, data={"password": "<pw>", "upload": file})
 
             self.assertEqual(200, r.status_code)
             url = r.data.decode("utf-8")
-            self.assertRegex(url, '\/image\/[A-Za-z0-9]+\.(png|jpg|jpeg)')
+            self.assertRegex(url, '\/[A-Za-z0-9]+\.(png|jpg|jpeg)')
 
             fileName = url.split("/")[-1]
-            self.assertTrue(os.path.isfile('public/images/{}'.format(fileName)))
+            self.assertTrue(isfile(images_dir(fileName)))
 
     def test_upload_post_bad_name(self):
-        with open(TestDir('resources/image.svg'), 'rb') as file:
+        with open(resources_dir('image.svg'), 'rb') as file:
             r = self.flaskApp.post(self.postUrl, data={"password": "<pw>", "upload": file})
 
-            self.assertEqual(200, r.status_code)
-            url = r.data.decode("utf-8")
-            self.assertRegex(url, '\/image\/[A-Za-z0-9]+\.svg')
-
-            fileName = url.split("/")[-1]
-            self.assertTrue(os.path.isfile('public/images/{}'.format(fileName)))
+            self.assertEqual(400, r.status_code)
 
     def test_upload_post_good_name_bad_type(self):
-        with open(TestDir('resources/image.jpg'), 'rb') as file:
+        with open(resources_dir('image.jpg'), 'rb') as file:
             r = self.flaskApp.post(self.postUrl, data={"password": "<pw>", "upload": file})
 
             self.assertEqual(400, r.status_code)
-            result = json.dumps(r.data.decode("utf-8"))
-            self.assertRegex(result, "Invalid File Type")
 
     def test_upload_post_bad(self):
-        with open(TestDir('resources/image.sh'), 'rb') as file:
+        with open(resources_dir('image.sh'), 'rb') as file:
             r = self.flaskApp.post(self.postUrl, data={"password": "<pw>", "upload": file})
 
             self.assertEqual(400, r.status_code)
-            result = json.dumps(r.data.decode("utf-8"))
-            self.assertRegex(result, "Invalid File Type")
 
 
 if __name__ == '__main__':

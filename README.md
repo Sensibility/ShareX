@@ -11,10 +11,9 @@ Python ShareX Server.
 Run the following
 ```
 git clone --depth 1 https://github.com/Sensibility/ShareX.git
-cd ShareX/
+cd ShareX/bin/
 chmod +x *.sh
 ./install.sh
-cp private/config/conf.orig.json private/config/conf.json
 ```
 
 ## Structure

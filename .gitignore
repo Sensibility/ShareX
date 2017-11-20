@@ -1,4 +1,3 @@
 *.pyc
 .idea
 app/resources/images/*
-private/config/conf.json
