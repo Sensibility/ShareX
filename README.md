@@ -1,4 +1,6 @@
-[![Build Status](https://ic.superphage.org/app/rest/builds/buildType:\(ShareX_Build\)/statusIcon)](https://ic.superphage.org/viewType.html?buildTypeId=ShareX_Build&guest=1)
+<a href="https://ic.superphage.org/viewType.html?buildTypeId=ShareX_Build&guest=1"> 
+<img src="https://ic.superphage.org/app/rest/builds/buildType:(ShareX_Build)/statusIcon"/>
+</a>
 
 # ShareX
 Python ShareX Server.
