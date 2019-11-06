@@ -18,14 +18,13 @@ import (
 )
 
 type ModuleDef struct {
-	Root		chan string
-	Index 		chan string
-	Password	chan string
+	Root		string
+	Index 		string
+	Password	string
 }
-func Init_ModuleDef (m *ModuleDef) {
-	m.Root = make(chan string)
-	m.Index = make(chan string)
-	m.Password = make(chan string)
+type ConfigurationDef struct {
+	CWD string
+	Modules map[string]ModuleDef
 }
 
 type Page struct {
@@ -33,15 +32,10 @@ type Page struct {
 	Image string
 }
 
-var CWD chan string
+var config ConfigurationDef
+type handle func(w http.ResponseWriter, r *http.Request, _ httprouter.Params, m ModuleDef)
 
 func convertMimeToExt(mimeType string) string {
-	var c [5]chan int
-	for i := range c {
-		c[i] = make(chan int)
-	}
-	c[0] <- 2
-
 	res, err := mime.ExtensionsByType(mimeType); CheckError(err)
 
 	return res[0]
@@ -49,23 +43,15 @@ func convertMimeToExt(mimeType string) string {
 
 func renderTemplate(w http.ResponseWriter, path string, p *Page) {
 	t, err := template.ParseFiles(path); CheckError(err)
-	t.Execute(w, p)
+	_ = t.Execute(w, p)
 }
 
 func CheckError(err error) (bool){
 	if err != nil {
-		log.Fatal(os.Stderr, "Error: %s\n", err)
+		log.Fatalf("Error: %s\n", err)
 		return true
 	}
 	return false
-}
-
-func getCWD() string {
-	cwd, err := os.Getwd()
-	CheckError(err)
-
-	cwd = cwd + "/sharex2"
-	return cwd
 }
 
 func getImage(w http.ResponseWriter, r *http.Request, hr httprouter.Params) {
@@ -82,15 +68,16 @@ func getFileType(file multipart.File) string {
 
 func hashString(s string) uint32 {
 	h := fnv.New32a()
-	h.Write([]byte(s))
+	_, _ = h.Write([]byte(s))
 	return h.Sum32()
 }
 
 func checkFileExists(fileName string, dir string) bool {
-	if _, err := os.Stat(path.Join(dir, fileName)); os.IsNotExist(err) {
-		return false
+	_, err := os.Stat(path.Join(dir, fileName));
+	if os.IsNotExist(err){
+		return true
 	}
-	return true
+	return false
 }
 
 func hashFileName(fileName string, outputDir string, seconds ...int) (string, error) {
@@ -99,9 +86,8 @@ func hashFileName(fileName string, outputDir string, seconds ...int) (string, er
 		second = seconds[0]
 	}
 	var err error; var res string
-
 	i := 5
-	for i--; i > 0;{
+	for ; i > 0; i-- {
 		newName := fileName + string(second + i)
 		newName = fmt.Sprint(hashString(newName))
 
@@ -121,7 +107,7 @@ func upload(w http.ResponseWriter, r *http.Request, _ httprouter.Params, m Modul
 	in, header, err := r.FormFile("image"); CheckError(err)
 	defer in.Close()
 
-	imgDir := path.Join(m.CWD, m.Root)
+	imgDir := path.Join(config.CWD, m.Root)
 
 	hash, err := hashFileName(header.Filename, imgDir); CheckError(err)
 
@@ -134,10 +120,10 @@ func upload(w http.ResponseWriter, r *http.Request, _ httprouter.Params, m Modul
 	log.Print(header)
 
 	w.Header().Add("ResponseType", "Text")
-	fmt.Fprintf(w, hash)
+	_, _ = fmt.Fprintf(w, hash)
 }
 
-func checkPassword(h httprouter.Handle, module ModuleDef) httprouter.Handle {
+func checkPassword(h handle, module ModuleDef) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		log.Print("Checking password from " + r.RemoteAddr)
 		if r.Header.Get("Password") != module.Password {
@@ -148,9 +134,12 @@ func checkPassword(h httprouter.Handle, module ModuleDef) httprouter.Handle {
 	}
 }
 
-func readConfig() chan ConfigurationDef {
-	var config chan ConfigurationDef = make(chan ConfigurationDef)
-	config <- Configuartion{}
+func readConfig()  {
+	dir, _ := os.Getwd()
+	config = ConfigurationDef{
+		CWD:   dir,
+		Modules: nil,
+	}
 
 	file, err := os.Open( config.CWD + "/private/config/conf.json"); CheckError(err)
 
@@ -161,12 +150,10 @@ func readConfig() chan ConfigurationDef {
 			Index: v.Index,
 			Password: v.Password}
 	}
-
-	return config
 }
 
 func main() {
-	var config  chan ConfigurationDef = readConfig()
+	readConfig()
 	router := httprouter.New()
 
 	router.POST("/image", checkPassword(upload, config.Modules["Images"]))

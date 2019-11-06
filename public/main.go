@@ -11,7 +11,7 @@ import (
 
 func CheckError(err error) (bool){
 	if err != nil {
-		log.Fatal(os.Stderr, "Error: %s\n", err)
+		log.Fatalf("Error: %s\n", err)
 		return true
 	}
 	return false
@@ -34,7 +34,7 @@ func main() {
 	CheckError(err)
 
 	contentType := bodyWriter.FormDataContentType()
-	bodyWriter.Close()
+	_ = bodyWriter.Close()
 
 	req, _ := http.NewRequest("POST", "http://localhost:9696/image", bodyBuf)
 	req.Header.Add("password", "not124")
