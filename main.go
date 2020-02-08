@@ -10,6 +10,7 @@ import (
 	"io"
 	"mime/multipart"
 	"hash/fnv"
+	"strings"
 	"time"
 	"errors"
 	"fmt"
@@ -46,7 +47,7 @@ func renderTemplate(w http.ResponseWriter, path string, p *Page) {
 	_ = t.Execute(w, p)
 }
 
-func CheckError(err error) (bool){
+func CheckError(err error) bool {
 	if err != nil {
 		log.Fatalf("Error: %s\n", err)
 		return true
@@ -73,11 +74,8 @@ func hashString(s string) uint32 {
 }
 
 func checkFileExists(fileName string, dir string) bool {
-	_, err := os.Stat(path.Join(dir, fileName));
-	if os.IsNotExist(err){
-		return true
-	}
-	return false
+	_, err := os.Stat(strings.ReplaceAll(path.Join(dir, fileName), "/", "\\"))
+	return !os.IsNotExist(err)
 }
 
 func hashFileName(fileName string, outputDir string, seconds ...int) (string, error) {
@@ -91,7 +89,7 @@ func hashFileName(fileName string, outputDir string, seconds ...int) (string, er
 		newName := fileName + string(second + i)
 		newName = fmt.Sprint(hashString(newName))
 
-		if !checkFileExists(res, outputDir) {
+		if !checkFileExists(newName, outputDir) {
 			res = newName
 			break
 		}
@@ -151,7 +149,6 @@ func readConfig()  {
 			Password: v.Password}
 	}
 }
-
 func main() {
 	readConfig()
 	router := httprouter.New()
@@ -159,9 +156,9 @@ func main() {
 	router.POST("/image", checkPassword(upload, config.Modules["Images"]))
 	router.GET("/image/:name", getImage)
 
-	root := config.Modules["Images"].Root + "/"
+	root := config.Modules["Images"].Root
 	router.ServeFiles(root + "*filepath", http.Dir(path.Join(config.CWD, root)))
-	log.Fatal(http.ListenAndServe(":9696", router))
+	log.Fatal(http.ListenAndServe(":5000", router))
 }
 
 

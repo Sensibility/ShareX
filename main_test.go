@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"testing"
 )
 
@@ -21,24 +22,26 @@ func TestHash(t *testing.T) {
 }
 
 func TestCheckFileExists(t *testing.T) {
-	fileNames := [...]string{"main_test.go", "totallynewfile.txt"}
-	existence := [...]bool{true, false}
-	dir := "./"
+	fileNames := [2]string{"main_test.go", "totallynewfile.txt"}
+	existence := [2]bool{true, false}
+	//dir := "./"
+	dir, _ := os.Getwd()
 	existsStr := "false"
 	nonStr := "true"
 
 	for i, e := range fileNames {
-		exists := !checkFileExists(e, dir)
+		exists := checkFileExists(e, dir)
+		t.Logf("Checking %s and %s, %t, %t", e, dir, existence[i], exists)
 		if exists != existence[i] {
 			if exists {
 				existsStr = "true"
 				nonStr = "false"
 			}
-			t.Errorf(errorString, "CheckFileExists", nonStr, existsStr, dir + "\n" + e)
+			t.Errorf(errorString, "CheckFileExists", existsStr, nonStr, dir + "\n" + e)
 		}
 	}
 
-	exists := !checkFileExists(fileNames[0], "B:")
+	exists := checkFileExists(fileNames[0], "B:")
 	if exists {
 		existsStr = "true"
 		nonStr = "false"
